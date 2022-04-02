@@ -8,6 +8,7 @@ Deze code word gratis ter beschikking gesteld. Ik ben niet verantwoordelijk voor
 - Geluiden bij binnenkomst en vertrek leden. Houd rekening met de 5 seconden regel.
 - Automatisch hoi zeggen tegen mensen die binnen komen. (Work in progress)
 - Gebruikers blokkeren. Klik op het profiel, en dan op "blokkeer".
+- Voorkomt dat je de chat uit gegooid word als je een tijdje stil bent
 
 ## Installeren:
 - Installeer deze Chrome plugin:
