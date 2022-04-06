@@ -8,7 +8,7 @@ function arrayRemove(arr, value) {
 }
 
 function blockMember(member_id){
-  if( member_id = user.id ){
+  if( member_id == user.id ){
     alert("Je kan jezelf niet blokkeren!");
     return;
   }
