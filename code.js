@@ -1,4 +1,3 @@
-var sayHelloState=false;
 var blockedMembers = new Array();
 
 function arrayRemove(arr, value) { 
@@ -42,11 +41,7 @@ chatChannel.bind("pusher:member_added", function(member) {
     if( !( member.id in chatChannel.members.members ) ){
       return false;
     }
-
     $('#chatAudio2')[0].play();
-    if( sayHelloState == true ){
-      sayHello( member );
-    }
   }, 6500);
 });
 
@@ -93,14 +88,26 @@ $(document).ready(function() {
   $("#siteContainer").css("padding", "0px");
   $("#contentContainer").css("max-height", "98vh");
   $("#main-container").css("padding", "0px");
+  $("html").css('overflow: hidden');
 });
 
 function linkify(text, target="_blank") {
     var urlRegex =/(\b(https?):\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])/ig;
-    return text.replace(urlRegex, function(url) {
+    var giphyRegex = /(\b(?<=https:\/\/media\.giphy\.com\/media\/)[-A-Za-z0-9]*(?=\/giphy\.gif))/ig;
+
+    if( null !== (giphyCode = text.match( giphyRegex )) ) {
+      text = text.replace( giphyRegex, '');
+      text = '<p>'+ text + '</p><iframe src="https://giphy.com/embed/'+ giphyCode +'" width="240" height="240" frameBorder="0" class="giphy-embed" allowFullScreen></iframe>';
+    } else {
+      //other URL's
+      text =  text.replace(urlRegex, function(url) {
         return '<a class="menu" href="' + url + '" target="'+target+'">' + url + '</a>';
-    });
+      });
+    }
+    return text;
 }
+
+
 
 //Overriding the default function
 function renderChatMessage(data){
@@ -110,6 +117,7 @@ function renderChatMessage(data){
   }
 
   data.message.body = linkify(data.message.body);
+  
   var template = '<div class="divFlex spaceBetween paddingSmall borderBottom color2br widthAuto"><div class="flexGrowDefault" style="padding-left: 5px"><div class="divFlex spaceBetween fontSmall"><div><strong>{{user.name}} - {{message.time}}</strong></div></div><div>{{{message.body}}}</div></div></div>';
   var messageTemplate = $(template).html();
   Mustache.parse(messageTemplate);
@@ -123,37 +131,7 @@ function renderChatMessage(data){
 
 //Overriding the default function
 function renderUserInfo(data){
-  var messageTemplate='<div class="divFlex spaceBetween"><div class="marginRightMedium flexShrinkDefault"><a href="{{{user.url}}}" target="_blank"><img src="{{user.image.src}}" alt="{{user.image.alt}}" class="radiusSmall square80"></a><div class="clearBoth marginTopSmall">{{user.name}}</div><div class="clearBoth fontSmall">{{user.age}}, {{user.gender}}</div><div class="clearBoth fontSmall">{{user.profession}}</div><a href="javascript:blockMember({{user.id}});">Blokkeer</a></div><div><div class="fontSmall color1d marginBottomSmall">In kanaal vanaf: {{timeInChannel}}</div><div class="doBold fontBig color3 marginBottomMedium">{{{user.bio.title}}}</div><div>{{user.bio.body}}</div></div></div>';
+  var messageTemplate='<div class="divFlex spaceBetween"><div class="marginRightMedium flexShrinkDefault"><a href="{{{user.url}}}" target="_blank"><img src="{{user.image.src}}" alt="{{user.image.alt}}" class="radiusSmall square80"></a><div class="clearBoth marginTopSmall">{{user.name}}</div><div class="clearBoth fontSmall">{{user.age}}, {{user.gender}}</div><div class="clearBoth fontSmall">{{user.profession}}</div><a href="javascript:blockMember({{user.id}});">Blokkeer</a> | <a class="kick-action color3 cursorP" data-id="{{user.id}}">Kick</a></div><div><div class="fontSmall color1d marginBottomSmall">In kanaal vanaf: {{timeInChannel}}</div><div class="doBold fontBig color3 marginBottomMedium">{{{user.bio.title}}}</div><div>{{user.bio.body}}</div></div></div>';
   Mustache.parse(messageTemplate);
   return Mustache.render(messageTemplate, data);
 }
-
-function sayHello( toUser ){
-  var url = '/ajax.php?module=roomchat&function=RoomChatMessage';
-
-  var data = {
-    channel: channel.channel_name, channelInfo: channel, from: 'me', to: 'channel', message: "Hey "+toUser.info.name
-  };
-
-  var messageQueueData = {
-    url: url,
-    data: data,
-    onSuccess: chatMessageCallback
-  };
-
-  queueUp(messageQueueData);
-  var now = new Date();
-  var messageData = {
-    message: {
-      id: Math.round(Math.random() * 100000),
-      body: "Hey "+toUser.info.name,
-      timestamp: now.getTime(),
-      isotime: now.toISOString()
-    },
-    user: user
-  };
-
-  addChatMessage(messageData);
-  lastMessage = new Date();
-}
-
